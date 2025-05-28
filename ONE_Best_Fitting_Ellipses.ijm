@@ -1,10 +1,3 @@
-/* Automated macro to process the currently selected image:
- * 1) Runs StarDist 2D on the original image (using ROI Manager output so no label image is created)
- * 2) Draws best fitting ellipses (with colored axes) directly onto the original image,
- *    converting the calibrated coordinates to pixel units.
- * 3) Resets the image scale to pixels so that measurements (and the CSV output)
- *    are in pixel units for overlay in MATLAB.
- */
 macro "Draw Best Fitting Ellipses" {
     // Reset ROI Manager and record the original image title
     roiManager("reset");
