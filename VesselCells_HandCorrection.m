@@ -2,20 +2,20 @@ clear;
 clc; 
 close all;
 
-% Change fluorescent intensity so that all valve cells are included
+%% ------------------ USER-DEFINED PARAMETERS ------------------ %%
+% Set your desired fluorescence intensity threshold
 fluorescent_intensity = 80;
 
-%% Load Data
-%
-csv_file = "/Volumes/cbs_lab_mcetera/Isabel/Lp_valve_data_for_scatterplot/1099.10_Lp/STARDIST/MAX_M1099.10_LP_P_10.csv"; 
-nuclei_data = readtable(csv_file);
+% Set the path to your .csv file
+csv_file = "/Path/To/Your/File.csv";
 
-tif_file = "/Volumes/cbs_lab_mcetera/Isabel/Lp_valve_data_for_scatterplot/1099.10_Lp/STARDIST/MAX_M1099.10_LP_P_10.tif";
-vessel_image = imread(tif_file);
+% Set the path to your .tif image file
+tif_file = "/Path/To/Your/Image.tif";
 
 %% Filter data
+nuclei_data = readtable(csv_file);
+vessel_image = imread(tif_file);
 
-% Filter Data Based on Fluorescent (percentile) and Area
 mean_area = mean(nuclei_data.Area);
 lower_cutoff = max(mean_area - (mean_area/2), 0);
 upper_cutoff = max(nuclei_data.Area);
@@ -25,15 +25,11 @@ filtered_data = nuclei_data(nuclei_data.Area >= lower_cutoff & ...
                             nuclei_data.Area <= upper_cutoff & ...
                             nuclei_data.Mean >= intensity_threshold, :);
 
-% Extract Parameters
 x_coords = filtered_data.X;
 y_coords = filtered_data.Y;
 full_roi_angles = mod(filtered_data.Angle, 180);
 major_axis = filtered_data.Feret / 2;
 minor_axis = filtered_data.MinFeret / 2;
-
-
-
 
 %% Figure 1: Define Vessel Midline
 figure(1);
@@ -57,7 +53,7 @@ raw_diff = abs(full_roi_angles - vessel_angle);
 angle_diff = min(raw_diff, 180 - raw_diff);
 norm_angles = angle_diff / 180;
 
-%% Define Colormaps
+%% Colormaps
 num_colors = 256;
 
 % CYM Colormap (for cyclic angle differences)
@@ -99,9 +95,7 @@ for i = 1:length(x_coords)
 end
 title('Figure 2: Click overlays to remove. Blue dot = clicked. Press Enter when done.');
 
-%% Hand Correct
-
-% User Correction
+%% User Hand Correction
 disp('Click on overlays you want to remove. Press Enter when done.');
 to_delete = false(height(filtered_data), 1);
 delete_radius = 10;
@@ -119,7 +113,6 @@ while true
     end
 end
 
-% Remove deleted data
 filtered_data = filtered_data(~to_delete, :);
 x_coords = x_coords(~to_delete);
 y_coords = y_coords(~to_delete);
@@ -247,37 +240,37 @@ plot(x_vessel, y_vessel, 'b-', 'LineWidth', 2);
 hold off;
 drawnow;
 
-% %% Figure Legends
-% 
-% % Figure 8: CYM Legend
-% figure(8);
-% legend_strip = repmat(linspace(0, 1, num_colors), 40, 1);
-% imagesc(legend_strip);
-% colormap(cym_colormap);
-% axis off;
-% title('Figure 8: CYM Colormap Legend');
-% c = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'0\xB0', '45\xB0', '90\xB0', '45\xB0', '0\xB0'});
-% c.Label.String = 'Cyclic Angle Difference';
-% 
-% % Figure 9: Distance Legend
-% figure(9);
-% legend_strip_dist = repmat(linspace(0, 1, num_colors_ar), 40, 1);
-% imagesc(legend_strip_dist);
-% colormap(interp1([0, 1], [[1 0.8 0.8]; [0.5 0 0]], linspace(0, 1, num_colors_ar)));
-% axis off;
-% title('Figure 9: Distance Colormap Legend (Red Gradient)');
-% cb = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'0', '25%', '50%', '75%', 'Max'});
-% cb.Label.String = 'Distance to Vessel Midline (relative)';
-% 
-% % Figure 10: AR Legend
-% figure(10);
-% legend_strip_AR = repmat(linspace(0, 1, num_colors_ar), 40, 1);
-% imagesc(legend_strip_AR);
-% colormap(AR_colormap);
-% axis off;
-% title('Figure 10: Aspect Ratio (AR) Colormap Legend');
-% cb = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'1', '1.5', '2', '2.5', '3'});
-% cb.Label.String = 'Aspect Ratio (AR)';
+%% Figure Legends
+
+% Figure 8: CYM Legend
+figure(8);
+legend_strip = repmat(linspace(0, 1, num_colors), 40, 1);
+imagesc(legend_strip);
+colormap(cym_colormap);
+axis off;
+title('Figure 8: CYM Colormap Legend');
+c = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'0\xB0', '45\xB0', '90\xB0', '45\xB0', '0\xB0'});
+c.Label.String = 'Cyclic Angle Difference';
+
+% Figure 9: Distance Legend
+figure(9);
+legend_strip_dist = repmat(linspace(0, 1, num_colors_ar), 40, 1);
+imagesc(legend_strip_dist);
+colormap(interp1([0, 1], [[1 0.8 0.8]; [0.5 0 0]], linspace(0, 1, num_colors_ar)));
+axis off;
+title('Figure 9: Distance Colormap Legend (Red Gradient)');
+cb = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'0', '25%', '50%', '75%', 'Max'});
+cb.Label.String = 'Distance to Vessel Midline (relative)';
+
+% Figure 10: AR Legend
+figure(10);
+legend_strip_AR = repmat(linspace(0, 1, num_colors_ar), 40, 1);
+imagesc(legend_strip_AR);
+colormap(AR_colormap);
+axis off;
+title('Figure 10: Aspect Ratio (AR) Colormap Legend');
+cb = colorbar('Ticks', linspace(0, 1, 5), 'TickLabels', {'1', '1.5', '2', '2.5', '3'});
+cb.Label.String = 'Aspect Ratio (AR)';
 
 %% Save Data
 output_table = table(filtered_data.Var1, angle_diff, filtered_data.AR, ...
