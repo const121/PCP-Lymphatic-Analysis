@@ -11,6 +11,7 @@ csv_file = "/Path/To/Your/File.csv";
 
 % Set the path to your .tif image file
 tif_file = "/Path/To/Your/Image.tif";
+% -------------------------------------------------------------- %
 
 %% Filter data
 nuclei_data = readtable(csv_file);
