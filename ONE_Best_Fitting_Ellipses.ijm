@@ -2,7 +2,7 @@ macro "Draw Best Fitting Ellipses" {
     roiManager("reset"); //reset ROI manager and record image title
     originalImage = getTitle();
 
-    // Run StarDist 2D
+    //Run StarDist 2D
     run("Command From Macro", "command=[de.csbdresden.stardist.StarDist2D], args=['input':'" 
         + originalImage + "', 'modelChoice':'Versatile (fluorescent nuclei)', 'normalizeInput':'true', "
         + "'percentileBottom':'1.0', 'percentileTop':'99.8', 'probThresh':'0.5', 'nmsThresh':'0.4', "
@@ -11,16 +11,17 @@ macro "Draw Best Fitting Ellipses" {
 
     selectImage(originalImage);
 
+    //measure ROIs (in calibrated units)
     run("Set Measurements...", "area centroid perimeter fit shape feret's mean redirect=None decimal=2"); //set measurements
     roiManager("Measure");
 
+	//store measurements
+	getVoxelSize(rescale, height, depth, unit); //get image size for rescale
     roiManager("reset"); //clear ROI manager before adding ellipse overlays
-
-    getVoxelSize(rescale, height, depth, unit); //get image size for rescale
+    
 
     //draw best fitting ellipse and its axes
     for(i = 0; i < nResults; i++) {
-        //convert to pixel units
         xc = getResult("X", i) / rescale;
         yc = getResult("Y", i) / rescale;
         major = getResult("Major", i) / rescale;
@@ -28,7 +29,7 @@ macro "Draw Best Fitting Ellipses" {
         angle = getResult("Angle", i);
         
         makeOval(xc - (major/2), yc - (minor/2), major, minor);
-        run("Rotate...", "angle=" + (180 - angle)); //adjust rotation
+        run("Rotate...", "angle=" + (180 - angle)); 
         roiManager("Add");  //add this ellipse to the ROI Manager
         run("Overlay Options...", "stroke=green width=0 fill=none");
         run("Add Selection...");
